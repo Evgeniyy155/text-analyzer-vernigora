@@ -20,4 +20,9 @@ class TextDocument
     {
         return str_word_count($this->content);
     }
+
+    public function getCharCount(): int
+    {
+        return mb_strlen($this->content);
+    }
 }
