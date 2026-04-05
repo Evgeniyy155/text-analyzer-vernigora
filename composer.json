@@ -1,0 +1,12 @@
+{
+  "name": "eugene/text-analyzer-vernigora",
+  "autoload": {
+    "psr-4": {
+      "Domain\\": "src/Domain/",
+      "Application\\": "src/Application/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0"
+  }
+}
