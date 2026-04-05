@@ -10,7 +10,8 @@ class AnalyzerService
     {
         $document = new TextDocument($text);
         return [
-            'words' => $document->getWordCount()
+            'words' => $document->getWordCount(),
+            'chars' => $document->getCharCount()
         ];
     }
 }
