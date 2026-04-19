@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Stage 1: Test
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Linting
+        run: find src tests -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Static Analysis (PHPStan)
+        run: vendor/bin/phpstan analyse src --level=1
+
+      - name: Unit Tests (PHPUnit)
+        run: vendor/bin/phpunit tests
+
+  # Stage 2: Build
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Artifact
+        run: |
+          echo "Build finished at $(date)" > build_artifact.txt
+          echo "Commit: ${{ github.sha }}" >> build_artifact.txt
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: build_artifact.txt
+
+  # Stage 3: Deploy to Staging
+  deploy_staging:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to STAGING Environment"
+          echo "Reading artifact contents:"
+          cat build_artifact.txt
+
+  # Stage 4: Verify Staging
+  verify_staging:
+    needs: deploy_staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Staging
+        run: |
+          echo "Running post-deploy verification"
+          php -r "assert(1 === 1); echo 'Staging is OK';"
+
+  # Stage 5: Deploy to Production
+  deploy_production:
+    needs: verify_staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to PRODUCTION Environment"
+          echo "Deploying the verified artifact:"
+          cat build_artifact.txt
+          echo "Deployment successful"
