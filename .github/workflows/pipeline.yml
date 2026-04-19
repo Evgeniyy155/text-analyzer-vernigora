@@ -75,7 +75,7 @@ jobs:
       - name: Verify Staging
         run: |
           echo "Running post-deploy verification"
-          php -r "assert(1 === 2); echo 'Staging is OK';"
+          php -r "if (1 === 2) { echo 'Staging is OK'; } else { echo 'Smoke test failed!'; exit(1); }"
 
   # Stage 5: Deploy to Production
   deploy_production:
