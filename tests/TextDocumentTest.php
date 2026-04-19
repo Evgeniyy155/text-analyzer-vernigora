@@ -11,7 +11,6 @@ class TextDocumentTest extends TestCase
     {
         $doc = new TextDocument("Hello world");
 
-        // НАВМИСНА ПОМИЛКА: тут 2 слова, а ми очікуємо 100, щоб тест впав!
-        $this->assertEquals(2, $doc->getWordCount());
+        $this->assertEquals(99, $doc->getWordCount());
     }
 }
