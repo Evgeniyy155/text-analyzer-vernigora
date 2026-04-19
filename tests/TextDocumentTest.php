@@ -11,6 +11,6 @@ class TextDocumentTest extends TestCase
     {
         $doc = new TextDocument("Hello world");
 
-        $this->assertEquals(99, $doc->getWordCount());
+        $this->assertEquals(2, $doc->getWordCount());
     }
 }
